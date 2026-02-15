@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Odds Notepad</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <main class="container">
+      <h1>Odds Notepad</h1>
+
+      <section class="form-section">
+        <div class="field-grid">
+          <label>
+            Game
+            <input id="game" type="text" placeholder="Team A vs Team B" />
+          </label>
+          <label>
+            Sportsbook A
+            <input id="sportsbookA" type="text" placeholder="Bookmaker name" />
+          </label>
+          <label>
+            Odds A
+            <input id="oddsA" type="text" placeholder="e.g. +120" />
+          </label>
+          <label>
+            Sportsbook B
+            <input id="sportsbookB" type="text" placeholder="Bookmaker name" />
+          </label>
+          <label>
+            Odds B
+            <input id="oddsB" type="text" placeholder="e.g. -105" />
+          </label>
+        </div>
+        <button id="saveButton" type="button">Save</button>
+      </section>
+
+      <section>
+        <h2>Saved Entries</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Game</th>
+              <th>Sportsbook A</th>
+              <th>Odds A</th>
+              <th>Sportsbook B</th>
+              <th>Odds B</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="entriesBody"></tbody>
+        </table>
+      </section>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>
