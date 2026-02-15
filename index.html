@@ -11,6 +11,17 @@
       <h1>Odds Notepad</h1>
 
       <section class="form-section">
+        <div class="odds-format-row">
+          <label>
+            Odds Format
+            <select id="oddsFormat">
+              <option value="american">American</option>
+              <option value="decimal">Decimal</option>
+            </select>
+          </label>
+          <p id="oddsHelpText" class="help-text"></p>
+        </div>
+
         <div class="field-grid">
           <label>
             Game
@@ -22,7 +33,7 @@
           </label>
           <label>
             Odds A
-            <input id="oddsA" type="text" placeholder="e.g. +120" />
+            <input id="oddsA" type="text" placeholder="e.g. +120 or -110" />
           </label>
           <label>
             Sportsbook B
@@ -30,7 +41,7 @@
           </label>
           <label>
             Odds B
-            <input id="oddsB" type="text" placeholder="e.g. -105" />
+            <input id="oddsB" type="text" placeholder="e.g. +120 or -110" />
           </label>
         </div>
         <button id="saveButton" type="button">Save</button>
@@ -43,9 +54,8 @@
             <tr>
               <th>Game</th>
               <th>Sportsbook A</th>
-              <th>Odds A</th>
               <th>Sportsbook B</th>
-              <th>Odds B</th>
+              <th>Best Line</th>
               <th>Actions</th>
             </tr>
           </thead>
@@ -54,6 +64,7 @@
       </section>
     </main>
 
+    <script src="odds-utils.js"></script>
     <script src="app.js"></script>
   </body>
 </html>

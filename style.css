@@ -10,7 +10,7 @@ body {
 }
 
 .container {
-  max-width: 900px;
+  max-width: 980px;
   margin: 0 auto;
   padding: 2rem 1rem;
 }
@@ -28,6 +28,16 @@ h2 {
   margin-bottom: 1.5rem;
 }
 
+.odds-format-row {
+  margin-bottom: 1rem;
+}
+
+.help-text {
+  margin: 0.5rem 0 0;
+  font-size: 0.9rem;
+  color: #374151;
+}
+
 .field-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -43,7 +53,8 @@ label {
   font-size: 0.9rem;
 }
 
-input {
+input,
+select {
   padding: 0.5rem;
   border: 1px solid #d1d5db;
   border-radius: 6px;
@@ -78,10 +89,40 @@ td {
   padding: 0.75rem;
   border-bottom: 1px solid #e5e7eb;
   text-align: left;
+  vertical-align: top;
 }
 
 tbody tr:last-child td {
   border-bottom: none;
+}
+
+.book-cell {
+  line-height: 1.5;
+}
+
+.book-cell-best {
+  background: #eff6ff;
+  border-radius: 6px;
+  padding: 0.4rem;
+}
+
+.book-name {
+  font-weight: 700;
+}
+
+.best-price,
+.best-inline-label {
+  display: inline-block;
+  background: #16a34a;
+  color: #ffffff;
+  padding: 0.1rem 0.45rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.best-inline-label {
+  margin-top: 0.35rem;
 }
 
 .delete-btn {

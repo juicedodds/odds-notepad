@@ -8,32 +8,69 @@ const formFields = {
   oddsB: document.getElementById('oddsB')
 };
 
+const oddsFormatSelect = document.getElementById('oddsFormat');
+const oddsHelpText = document.getElementById('oddsHelpText');
 const saveButton = document.getElementById('saveButton');
 const entriesBody = document.getElementById('entriesBody');
 
 let entries = loadEntries();
+updateOddsHelpText();
 renderEntries();
 
+oddsFormatSelect.addEventListener('change', updateOddsHelpText);
 saveButton.addEventListener('click', () => {
-  const newEntry = {
-    id: createEntryId(),
-    game: formFields.game.value.trim(),
-    sportsbookA: formFields.sportsbookA.value.trim(),
-    oddsA: formFields.oddsA.value.trim(),
-    sportsbookB: formFields.sportsbookB.value.trim(),
-    oddsB: formFields.oddsB.value.trim()
-  };
+  const game = formFields.game.value.trim();
+  const sportsbookA = formFields.sportsbookA.value.trim();
+  const sportsbookB = formFields.sportsbookB.value.trim();
+  const oddsA = formFields.oddsA.value.trim();
+  const oddsB = formFields.oddsB.value.trim();
+  const format = oddsFormatSelect.value;
 
-  if (!newEntry.game || !newEntry.sportsbookA || !newEntry.oddsA || !newEntry.sportsbookB || !newEntry.oddsB) {
+  if (!game || !sportsbookA || !oddsA || !sportsbookB || !oddsB) {
     alert('Please fill in all fields before saving.');
     return;
   }
 
-  entries.push(newEntry);
+  let convertedA;
+  let convertedB;
+
+  try {
+    convertedA = OddsUtils.toInternalOdds(oddsA, format);
+    convertedB = OddsUtils.toInternalOdds(oddsB, format);
+  } catch (error) {
+    alert(error.message);
+    return;
+  }
+
+  entries.push({
+    id: createEntryId(),
+    game,
+    sportsbookA,
+    sportsbookB,
+    sourceFormat: format,
+    rawOddsA: oddsA,
+    rawOddsB: oddsB,
+    convertedA,
+    convertedB
+  });
+
   persistEntries();
   renderEntries();
   clearForm();
 });
+
+function updateOddsHelpText() {
+  const format = oddsFormatSelect.value;
+  const placeholder = format === 'american' ? 'e.g. +120 or -110' : 'e.g. 2.20';
+
+  formFields.oddsA.placeholder = placeholder;
+  formFields.oddsB.placeholder = placeholder;
+
+  oddsHelpText.textContent =
+    format === 'american'
+      ? 'American odds use + and - signs. Example: +120 returns 1.2x profit on $100, while -110 means you risk $110 to profit $100.'
+      : 'Decimal odds show total return per $1 stake. Example: 2.20 returns $2.20 total (stake included) for each $1.';
+}
 
 function loadEntries() {
   const stored = localStorage.getItem(STORAGE_KEY);
@@ -44,7 +81,11 @@ function loadEntries() {
 
   try {
     const parsed = JSON.parse(stored);
-    return Array.isArray(parsed) ? parsed : [];
+    if (!Array.isArray(parsed)) {
+      return [];
+    }
+
+    return parsed.filter((entry) => entry && entry.convertedA && entry.convertedB);
   } catch {
     return [];
   }
@@ -59,28 +100,40 @@ function renderEntries() {
 
   if (entries.length === 0) {
     const emptyRow = document.createElement('tr');
-    emptyRow.innerHTML = '<td colspan="6">No saved entries yet.</td>';
+    emptyRow.innerHTML = '<td colspan="10">No saved entries yet.</td>';
     entriesBody.appendChild(emptyRow);
     return;
   }
 
   entries.forEach((entry) => {
     const row = document.createElement('tr');
+    const bestBookKey = entry.convertedA.decimal >= entry.convertedB.decimal ? 'A' : 'B';
+    const bestBookName = bestBookKey === 'A' ? entry.sportsbookA : entry.sportsbookB;
 
     row.innerHTML = `
       <td>${escapeHtml(entry.game)}</td>
-      <td>${escapeHtml(entry.sportsbookA)}</td>
-      <td>${escapeHtml(entry.oddsA)}</td>
-      <td>${escapeHtml(entry.sportsbookB)}</td>
-      <td>${escapeHtml(entry.oddsB)}</td>
+      <td>${renderBookOdds(entry.sportsbookA, entry.convertedA, bestBookKey === 'A')}</td>
+      <td>${renderBookOdds(entry.sportsbookB, entry.convertedB, bestBookKey === 'B')}</td>
+      <td><span class="best-price">Best Price: ${escapeHtml(bestBookName)}</span></td>
       <td><button type="button" class="delete-btn" data-id="${entry.id}">Delete</button></td>
     `;
 
     const deleteButton = row.querySelector('.delete-btn');
     deleteButton.addEventListener('click', () => deleteEntry(entry.id));
-
     entriesBody.appendChild(row);
   });
+}
+
+function renderBookOdds(bookName, convertedOdds, isBestPrice) {
+  return `
+    <div class="book-cell ${isBestPrice ? 'book-cell-best' : ''}">
+      <div class="book-name">${escapeHtml(bookName)}</div>
+      <div>American: ${escapeHtml(convertedOdds.american)}</div>
+      <div>Decimal: ${OddsUtils.formatDecimal(convertedOdds.decimal)}</div>
+      <div>Implied %: ${OddsUtils.formatImpliedProbability(convertedOdds.impliedProbability)}</div>
+      ${isBestPrice ? '<div class="best-inline-label">Best Price</div>' : ''}
+    </div>
+  `;
 }
 
 function createEntryId() {
@@ -106,7 +159,7 @@ function clearForm() {
 }
 
 function escapeHtml(text) {
-  return text
+  return String(text)
     .replaceAll('&', '&amp;')
     .replaceAll('<', '&lt;')
     .replaceAll('>', '&gt;')
