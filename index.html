@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Odds Notepad</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <main class="container">
+      <h1>Odds Notepad</h1>
+
+      <section class="form-section">
+        <div class="odds-format-row">
+          <label>
+            Odds Format
+            <select id="oddsFormat">
+              <option value="american">American</option>
+              <option value="decimal">Decimal</option>
+            </select>
+          </label>
+          <p id="oddsHelpText" class="help-text"></p>
+        </div>
+
+        <div class="field-grid">
+          <label>Game <input id="game" type="text" placeholder="Team A vs Team B" /></label>
+          <label>Sportsbook A <input id="sportsbookA" type="text" placeholder="Bookmaker name" /></label>
+          <label>Odds A <input id="oddsA" type="text" placeholder="e.g. +120 or -110" /></label>
+          <label>Sportsbook B <input id="sportsbookB" type="text" placeholder="Bookmaker name" /></label>
+          <label>Odds B <input id="oddsB" type="text" placeholder="e.g. +120 or -110" /></label>
+        </div>
+        <button id="saveButton" type="button">Save</button>
+      </section>
+
+      <section class="form-section">
+        <h2>Arbitrage Calculator</h2>
+        <div class="field-grid">
+          <label>
+            Mode
+            <select id="arbMode">
+              <option value="2">2-way</option>
+              <option value="3">3-way</option>
+            </select>
+          </label>
+          <label>Currency rounding ($)<input id="roundingIncrement" type="number" step="0.01" min="0.01" value="0.01" /></label>
+          <label>Total stake ($)<input id="arbStake" type="number" min="0.01" step="0.01" placeholder="100" /></label>
+        </div>
+
+        <div id="arbOutcomeGrid" class="field-grid">
+          <label>Outcome 1 Sportsbook (optional) <input id="arbBook1" type="text" placeholder="Book A" /></label>
+          <label>Outcome 1 Odds <input id="arbOdds1" type="text" placeholder="e.g. +120 or -110" /></label>
+          <label>Outcome 2 Sportsbook (optional) <input id="arbBook2" type="text" placeholder="Book B" /></label>
+          <label>Outcome 2 Odds <input id="arbOdds2" type="text" placeholder="e.g. +120 or -110" /></label>
+          <label id="outcome3BookWrap">Outcome 3 Sportsbook (optional) <input id="arbBook3" type="text" placeholder="Book C" /></label>
+          <label id="outcome3OddsWrap">Outcome 3 Odds <input id="arbOdds3" type="text" placeholder="e.g. +250 or 3.50" /></label>
+        </div>
+
+        <div class="button-row">
+          <button id="calculateArbButton" type="button">Calculate</button>
+          <button id="copySummaryButton" type="button" class="secondary-btn">Copy summary</button>
+        </div>
+
+        <div id="arbResults" class="arb-results" aria-live="polite">Enter values and click Calculate.</div>
+      </section>
+
+      <section>
+        <h2>Saved Entries</h2>
+        <table>
+          <thead>
+            <tr><th>Game</th><th>Sportsbook A</th><th>Sportsbook B</th><th>Best Line</th><th>Actions</th></tr>
+          </thead>
+          <tbody id="entriesBody"></tbody>
+        </table>
+      </section>
+
+      <aside class="disclaimer" role="note">
+        <strong>Educational only.</strong> Not betting advice. Check local laws. 21+.
+      </aside>
+    </main>
+
+    <script src="odds-utils.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>
