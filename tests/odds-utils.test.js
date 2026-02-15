@@ -1,53 +1,48 @@
 const assert = require('assert');
 const {
-  isValidAmericanOdds,
-  parseAmericanOdds,
-  isValidDecimalOdds,
   americanToDecimal,
-  decimalToAmerican,
-  decimalToImpliedProbability,
-  toInternalOdds
+  sumImpliedProbabilities,
+  calculateSurebet
 } = require('../odds-utils.js');
 
 function approxEqual(actual, expected, tolerance = 0.00001) {
-  assert.ok(Math.abs(actual - expected) <= tolerance, `Expected ${actual} to be within ${tolerance} of ${expected}`);
+  assert.ok(Math.abs(actual - expected) <= tolerance, `Expected ${actual} ≈ ${expected}`);
 }
 
-function testAmericanValidation() {
-  assert.strictEqual(isValidAmericanOdds('+120'), true);
-  assert.strictEqual(isValidAmericanOdds('-110'), true);
-  assert.strictEqual(isValidAmericanOdds('120'), false);
-  assert.throws(() => parseAmericanOdds('+90'));
+function testAmericanToDecimal() {
+  approxEqual(americanToDecimal(120), 2.2);
+  approxEqual(americanToDecimal(-110), 1 + 100 / 110);
 }
 
-function testDecimalValidation() {
-  assert.strictEqual(isValidDecimalOdds('2.10'), true);
-  assert.strictEqual(isValidDecimalOdds('1.00'), false);
+function testImpliedProbabilitySum() {
+  const S2 = sumImpliedProbabilities([2.1, 2.1]);
+  approxEqual(S2, 1 / 2.1 + 1 / 2.1);
+
+  const S3 = sumImpliedProbabilities([3.2, 3.4, 3.5]);
+  approxEqual(S3, 1 / 3.2 + 1 / 3.4 + 1 / 3.5);
 }
 
-function testConversions() {
-  approxEqual(americanToDecimal(150), 2.5);
-  approxEqual(americanToDecimal(-110), 1.9090909, 0.0001);
-  assert.strictEqual(decimalToAmerican(2.5), '+150');
-  assert.strictEqual(decimalToAmerican(1.91), '-110');
-  approxEqual(decimalToImpliedProbability(2.0), 0.5);
+function testStakeSplitRoundingTotalApprox() {
+  const result = calculateSurebet([2.1, 2.1], 100, 0.01);
+  const roundedTotal = result.roundedStakes.reduce((sum, stake) => sum + stake, 0);
+  assert.ok(Math.abs(roundedTotal - 100) <= 0.02, 'Rounded stakes should approximately sum to total stake');
 }
 
-function testInternalFormat() {
-  const fromAmerican = toInternalOdds('+120', 'american');
-  assert.strictEqual(fromAmerican.american, '+120');
-  approxEqual(fromAmerican.decimal, 2.2);
+function testArbitrageDetection() {
+  const yesArb = calculateSurebet([2.2, 2.2], 100, 0.01);
+  assert.strictEqual(yesArb.exists, true);
+  assert.ok(yesArb.S < 1);
 
-  const fromDecimal = toInternalOdds('2.20', 'decimal');
-  assert.strictEqual(fromDecimal.american, '+120');
-  approxEqual(fromDecimal.impliedProbability, 1 / 2.2);
+  const noArb = calculateSurebet([1.8, 1.9], 100, 0.01);
+  assert.strictEqual(noArb.exists, false);
+  assert.ok(noArb.S >= 1);
 }
 
 function runTests() {
-  testAmericanValidation();
-  testDecimalValidation();
-  testConversions();
-  testInternalFormat();
+  testAmericanToDecimal();
+  testImpliedProbabilitySum();
+  testStakeSplitRoundingTotalApprox();
+  testArbitrageDetection();
   console.log('All odds-utils tests passed.');
 }
 
